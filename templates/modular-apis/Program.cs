@@ -1,20 +1,17 @@
-using Scalar.AspNetCore;
 using Werter.ModularApis.Features.Todos;
+using Werter.ModularApis.Observability;
+using Werter.ModularApis.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddOpenApi();
+builder.AddObservability();
+builder.AddApiDocumentation();
 builder.Services.AddHealthChecks();
 builder.Services.AddTodosFeature();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-}
-
+app.MapApiDocumentation();
 app.UseHttpsRedirection();
 app.MapHealthChecks("/health");
 app.MapTodosEndpoints();

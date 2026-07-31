@@ -1,6 +1,6 @@
 # Werter.ModularApis
 
-Template de ASP.NET Core **Minimal APIs** (.NET 10) organizado em **vertical slices**, com health check, OpenAPI, Scalar e collection Bruno pronta para uso.
+Template de ASP.NET Core **Minimal APIs** (.NET 10) organizado em **vertical slices**, com health check, OpenAPI, Scalar, OpenTelemetry e collection Bruno pronta para uso.
 
 ## Como executar
 
@@ -9,6 +9,20 @@ dotnet run --launch-profile http
 ```
 
 A API sobe em **http://localhost:5080**.
+
+### Nome e descrição da API
+
+Personalize em `appsettings.json` (seção `Api` — **obrigatória**):
+
+```json
+"Api": {
+  "Name": "API0xpto",
+  "Description": "API responsável por xpto"
+}
+```
+
+Esses valores aparecem no OpenAPI/Scalar e no `service.name` do OpenTelemetry.  
+Se a seção `Api` ou `OpenTelemetry` não existir (ou propriedades obrigatórias estiverem vazias), a aplicação falha na inicialização com mensagem explícita.
 
 ### Endpoints úteis
 
@@ -19,18 +33,37 @@ A API sobe em **http://localhost:5080**.
 | OpenAPI | http://localhost:5080/openapi/v1.json |
 | Scalar (Development) | http://localhost:5080/scalar/v1 |
 
+## OpenTelemetry
+
+A API exporta **traces**, **metrics** e **logs** via **OTLP gRPC**, pronta para o Grafana Alloy (ou OpenTelemetry Collector) coletar.
+
+Configuração em `appsettings.json`:
+
+```json
+"OpenTelemetry": {
+  "ServiceName": "Werter.ModularApis",
+  "OtlpEndpoint": "http://localhost:4317"
+}
+```
+
+No Compose/Kubernetes, use `OTEL_EXPORTER_OTLP_ENDPOINT` (e `OTEL_EXPORTER_OTLP_PROTOCOL=grpc` se necessário).
+
+Instrumentação estável incluída: ASP.NET Core, HttpClient e Runtime.  
+`/health` fica disponível para containers/orquestração e **não gera spans**; `/openapi` e `/scalar` também são excluídos do tracing.
+
 ## Bruno (cliente REST)
 
-A collection padrão fica na pasta **`bruno/Todo/`** (OpenCollection YAML, com `opencollection.yml`).
+O **Bruno** é o cliente REST HTTP do projeto. O objetivo é **versionar as collections no Git** e compartilhá-las entre as equipes de desenvolvimento: os arquivos de request ficam no repositório, todos os devs usam as mesmas collections, aumentam a produtividade e contam com uma documentação prática dos endpoints.
 
-### Instalar o Bruno
+É necessário instalar o Bruno em uma destas formas:
 
-Escolha uma opção:
-
-1. **Extensão no VS Code ou Cursor** — busque por **Bruno** no painel de Extensions, ou instale pelo Marketplace: [bruno-api-client.bruno](https://marketplace.visualstudio.com/items?itemName=bruno-api-client.bruno)
-2. **App desktop** — baixe em [usebruno.com/downloads](https://www.usebruno.com/downloads)
+1. **Extensão no VS Code** — Marketplace: [bruno-api-client.bruno](https://marketplace.visualstudio.com/items?itemName=bruno-api-client.bruno)
+2. **Extensão no Cursor** — busque por **Bruno** no painel de Extensions (mesmo pacote da VS Code)
+3. **Bruno Desktop** — [usebruno.com/downloads](https://www.usebruno.com/downloads)
 
 ### Abrir a collection
+
+A collection padrão fica na pasta **`bruno/Todo/`** (OpenCollection YAML, com `opencollection.yml`).
 
 1. No Bruno, abra a pasta `bruno/Todo/` (é onde está o `opencollection.yml`)
 2. Selecione o environment **local** (`todo` = `http://localhost:5080`)
@@ -54,8 +87,11 @@ Features/
     Contracts/              # Request/Response (DTOs)
     UseCases/               # Casos de uso concretos (sem MediatR)
     TodosFeatureExtensions.cs
+Observability/              # OpenTelemetry (OTLP gRPC)
+OpenApi/                    # Documentação OpenAPI/Scalar (Api:Name/Description)
+Configuration/              # ApiOptions e configs da API
 bruno/Todo/                 # Collection Bruno (OpenCollection)
-Program.cs                  # Pipeline, health, OpenAPI/Scalar
+Program.cs                  # Pipeline enxuto
 ```
 
 A feature **Todos** é um exemplo stub (sem persistência) para servir de base ao criar novos slices.

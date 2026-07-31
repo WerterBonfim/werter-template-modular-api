@@ -52,6 +52,7 @@ dotnet new install ./artifacts/Werter.ModularApis.Templates.1.0.0.nupkg
 - Health check em `/health`
 - OpenAPI + Scalar UI em Development (`/openapi/v1.json`, `/scalar/v1`)
 - Collection **Bruno** em `bruno/Todo/` (environment `local`)
+- OpenTelemetry (traces, metrics e logs) via OTLP gRPC para Grafana Alloy
 - Porta HTTP fixa **5080**
 - README do projeto gerado com instruções de uso
 
@@ -76,11 +77,28 @@ template-aspnet/
 │   └── modular-apis/                     # conteúdo gerado pelo template
 │       ├── .template.config/
 │       ├── Features/Todos/
+│       ├── Observability/
 │       ├── bruno/Todo/
 │       ├── Program.cs
 │       └── README.md
 └── README.md                             # este arquivo
 ```
+
+## OpenTelemetry
+
+O template já vem instrumentado com OpenTelemetry (traces, metrics e logs), exportando via **OTLP gRPC** (padrão Alloy: `http://localhost:4317`).
+
+Configuração em `appsettings.json`:
+
+```json
+"OpenTelemetry": {
+  "ServiceName": "Werter.ModularApis",
+  "OtlpEndpoint": "http://localhost:4317"
+}
+```
+
+No Compose/Kubernetes, você também pode usar `OTEL_EXPORTER_OTLP_ENDPOINT` / `OTEL_EXPORTER_OTLP_PROTOCOL=grpc`.  
+`/health` permanece disponível para orquestração e **não gera spans** (também exclui `/openapi` e `/scalar` do tracing).
 
 ## Desenvolver o conteúdo do template
 
