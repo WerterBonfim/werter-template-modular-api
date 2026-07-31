@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>Werter.ModularApis.Templates</PackageId>
+    <PackageVersion>1.0.0</PackageVersion>
+    <Title>Werter Modular APIs Templates</Title>
+    <Authors>Werter</Authors>
+    <Description>Templates for creating modular ASP.NET Core Minimal API applications with .NET 10.</Description>
+    <PackageTags>dotnet-new;templates;webapi;minimal-apis;werter</PackageTags>
+
+    <PackageType>Template</PackageType>
+    <TargetFramework>net10.0</TargetFramework>
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <ContentTargetFolders>content</ContentTargetFolders>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <NoDefaultExcludes>true</NoDefaultExcludes>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="templates/**/*" Exclude="templates/**/bin/**;templates/**/obj/**" />
+    <Compile Remove="**/*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="templates\modular-apis\bruno\" />
+  </ItemGroup>
+
+</Project>

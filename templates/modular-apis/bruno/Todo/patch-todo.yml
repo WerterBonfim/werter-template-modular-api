@@ -1,0 +1,25 @@
+info:
+  name: patch-todo
+  type: http
+  seq: 6
+
+http:
+  method: PATCH
+  url: "{{todo}}/todos/:id"
+  params:
+    - name: id
+      value: "1"
+      type: path
+  body:
+    type: json
+    data: |-
+      {
+        "isComplete": true
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
