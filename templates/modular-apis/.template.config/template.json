@@ -24,6 +24,44 @@
       ],
       "defaultValue": "net10.0",
       "replaces": "net10.0"
+    },
+    "FeatureName": {
+      "type": "parameter",
+      "datatype": "text",
+      "displayName": "Feature name (plural)",
+      "description": "Nome plural da feature de exemplo em PascalCase (pasta, namespace, tags). Ex.: Todos, Products, Pedidos",
+      "defaultValue": "Todos",
+      "replaces": "Todos",
+      "fileRename": "Todos"
+    },
+    "featureNameLower": {
+      "type": "generated",
+      "generator": "casing",
+      "parameters": {
+        "source": "FeatureName",
+        "toLower": true
+      },
+      "replaces": "todos",
+      "fileRename": "todos"
+    },
+    "EntityName": {
+      "type": "parameter",
+      "datatype": "text",
+      "displayName": "Entity name (singular)",
+      "description": "Nome singular da entidade em PascalCase (classes, Bruno). Ex.: Todo, Product, Pedido",
+      "defaultValue": "Todo",
+      "replaces": "Todo",
+      "fileRename": "Todo"
+    },
+    "entityNameLower": {
+      "type": "generated",
+      "generator": "casing",
+      "parameters": {
+        "source": "EntityName",
+        "toLower": true
+      },
+      "replaces": "todo",
+      "fileRename": "todo"
     }
   }
 }

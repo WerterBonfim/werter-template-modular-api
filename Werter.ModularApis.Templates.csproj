@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Werter.ModularApis.Templates</PackageId>
-    <PackageVersion>1.0.0</PackageVersion>
+    <PackageVersion>1.3.0</PackageVersion>
     <Title>Werter Modular APIs Templates</Title>
     <Authors>Werter</Authors>
     <Description>Templates for creating modular ASP.NET Core Minimal API applications with .NET 10.</Description>
@@ -23,8 +23,5 @@
     <Compile Remove="**/*" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="templates\modular-apis\bruno\" />
-  </ItemGroup>
-
 </Project>
+

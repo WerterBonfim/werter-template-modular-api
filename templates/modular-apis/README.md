@@ -1,18 +1,20 @@
 # Werter.ModularApis
 
-Template de ASP.NET Core **Minimal APIs** (.NET 10) organizado em **vertical slices**, com health check, OpenAPI, Scalar, OpenTelemetry e collection Bruno pronta para uso.
+Template de ASP.NET Core **Minimal APIs** (.NET 10) em **monolito modular**: um projeto Api em `src/`, com `Shared/` (cross-cutting) e `Modules/` (vertical slices por ação).
 
 ## Como executar
 
+Na raiz da solution:
+
 ```bash
-dotnet run --launch-profile http
+dotnet run --project src/Werter.ModularApis.Api --launch-profile http
 ```
 
 A API sobe em **http://localhost:5080**.
 
 ### Nome e descrição da API
 
-Personalize em `appsettings.json` (seção `Api` — **obrigatória**):
+Personalize em `src/Werter.ModularApis.Api/appsettings.json` (seção `Api` — **obrigatória**):
 
 ```json
 "Api": {
@@ -41,11 +43,11 @@ Configuração em `appsettings.json`:
 
 ```json
 "OpenTelemetry": {
-  "ServiceName": "Werter.ModularApis",
   "OtlpEndpoint": "http://localhost:4317"
 }
 ```
 
+O `service.name` vem de `Api:Name`.  
 No Compose/Kubernetes, use `OTEL_EXPORTER_OTLP_ENDPOINT` (e `OTEL_EXPORTER_OTLP_PROTOCOL=grpc` se necessário).
 
 Instrumentação estável incluída: ASP.NET Core, HttpClient e Runtime.  
@@ -82,24 +84,38 @@ A collection padrão fica na pasta **`bruno/Todo/`** (OpenCollection YAML, com `
 ## Estrutura do código
 
 ```text
-Features/
-  Todos/
-    Contracts/              # Request/Response (DTOs)
-    UseCases/               # Casos de uso concretos (sem MediatR)
-    TodosFeatureExtensions.cs
-Observability/              # OpenTelemetry (OTLP gRPC)
-OpenApi/                    # Documentação OpenAPI/Scalar (Api:Name/Description)
-Configuration/              # ApiOptions e configs da API
-bruno/Todo/                 # Collection Bruno (OpenCollection)
-Program.cs                  # Pipeline enxuto
+Werter.ModularApis.sln
+bruno/Todo/                         # Collection Bruno (OpenCollection)
+src/
+  Werter.ModularApis.Api/
+    Program.cs                      # Host enxuto
+    Shared/
+      Configuration/                # ApiOptions, OpenTelemetryOptions
+      Observability/                # OpenTelemetry (OTLP gRPC)
+      OpenApi/                      # OpenAPI + Scalar
+      Data/                         # Stub para persistência (sem EF ainda)
+      Exceptions/                   # Handler global ProblemDetails
+      Extensions/                   # AddSharedInfrastructure / UseSharedPipeline
+    Modules/
+      Todos/
+        Todo.cs                     # Entidade do módulo
+        TodosModule.cs              # DI + mapeamento de endpoints
+        Features/
+          ListTodos/                # Endpoint + UseCase + Response
+          GetTodoById/
+          CreateTodo/
+          UpdateTodo/
+          PatchTodo/
+          DeleteTodo/
 ```
 
-A feature **Todos** é um exemplo stub (sem persistência) para servir de base ao criar novos slices.
+O módulo **Todos** é um exemplo stub (sem persistência) para servir de base ao criar novos módulos/slices.
+
+Ao gerar o projeto, o nome pode ser trocado com `--FeatureName` (plural) e `--EntityName` (singular), por exemplo `--FeatureName Products --EntityName Product`.
 
 ## Porta HTTP
 
 O perfil `http` usa a porta fixa **5080**, alinhada entre:
 
-- `Properties/launchSettings.json`
+- `src/Werter.ModularApis.Api/Properties/launchSettings.json`
 - `bruno/Todo/environments/local.yml`
-- `Werter.ModularApis.http` (REST Client do editor)
