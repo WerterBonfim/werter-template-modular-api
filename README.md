@@ -1,6 +1,6 @@
 # Werter.ModularApis.Templates
 
-Pacote de template `dotnet new` para criar APIs ASP.NET Core **Minimal APIs** (.NET 10) em **monolito modular** (`src/{Nome}.Api` + `Shared` + `Modules`).
+Pacote de template `dotnet new` para criar APIs ASP.NET Core **Minimal APIs** (.NET 10) em **monolito modular** (`src/{Nome}` + `Shared` + `Modules`).
 
 | Item | Valor |
 |------|--------|
@@ -18,7 +18,7 @@ Pacote de template `dotnet new` para criar APIs ASP.NET Core **Minimal APIs** (.
 
 ```bash
 dotnet pack Werter.ModularApis.Templates.csproj -c Release -o ./artifacts
-dotnet new install ./artifacts/Werter.ModularApis.Templates.1.3.0.nupkg --force
+dotnet new install ./artifacts/Werter.ModularApis.Templates.1.3.3.nupkg --force
 ```
 
 ### A partir da pasta do template (desenvolvimento)
@@ -34,7 +34,7 @@ dotnet new install ./templates/modular-apis --force
 ```bash
 dotnet new werter-modular-apis -n MinhaApi
 cd MinhaApi
-dotnet run --project src/MinhaApi.Api --launch-profile http
+dotnet run --project src/MinhaApi --launch-profile http
 ```
 
 A API sobe em **http://localhost:5080**.
@@ -63,22 +63,25 @@ Se a versão do pacote não mudar, o `dotnet new install` pode manter o cache an
 ```bash
 dotnet new uninstall Werter.ModularApis.Templates
 dotnet pack Werter.ModularApis.Templates.csproj -c Release -o ./artifacts
-dotnet new install ./artifacts/Werter.ModularApis.Templates.1.3.0.nupkg --force
+dotnet new install ./artifacts/Werter.ModularApis.Templates.1.3.3.nupkg --force
 ```
 
 Confira a versão instalada com `dotnet new list werter`.
 
+No **Rider** / Visual Studio, os campos **FeatureName** e **EntityName** aparecem no diálogo New Project graças ao `ide.host.json` (após reinstalar o pacote e, se necessário, reiniciar a IDE).
+
 ## O que o template gera
 
-- Solution + projeto único em `src/{Nome}.Api`
-- `Shared/` com Configuration, Observability, OpenApi, Data (stub), Exceptions e Extensions
+- Solution + projeto único em `src/{Nome}` (sem sufixo fixo `.Api`)
+- Pasta `tests/` vazia (pronta para projetos de teste)
+- `Shared/` com Configuration, Observability, OpenApi, Data, Exceptions, Extensions e ValueObjects
 - Módulo de exemplo em `Modules/{Feature}` com fatias por ação (Endpoint + UseCase + Request/Response)
 - Health check em `/health`
 - OpenAPI + Scalar UI em Development (`/openapi/v1.json`, `/scalar/v1`)
 - Collection **Bruno** alinhada ao nome da entidade
 - OpenTelemetry (traces, metrics e logs) via OTLP gRPC para Grafana Alloy
 - Porta HTTP fixa **5080**
-- README do projeto gerado com instruções de uso
+- README do projeto gerado com a descrição da arquitetura (monolito modular + vertical slice)
 
 ### Endpoints de exemplo (default Todos)
 
@@ -102,12 +105,15 @@ template-aspnet/
 │       ├── .template.config/
 │       ├── Werter.ModularApis.sln
 │       ├── bruno/Todo/
-│       ├── src/Werter.ModularApis.Api/
-│       │   ├── Shared/
+│       ├── tests/                        # espaço para testes do consumidor
+│       ├── src/Werter.ModularApis/
+│       │   ├── Shared/                   # incl. ValueObjects/
 │       │   └── Modules/Todos/
-│       └── README.md
+│       └── README.md                     # arquitetura das pastas/camadas
 └── README.md                             # este arquivo
 ```
+
+Detalhamento do papel de cada pasta/camada: [templates/modular-apis/README.md](templates/modular-apis/README.md#arquitetura-monolito-modular--vertical-slice).
 
 ## OpenTelemetry
 
@@ -130,7 +136,7 @@ No Compose/Kubernetes, você também pode usar `OTEL_EXPORTER_OTLP_ENDPOINT` / `
 Para editar e testar a API diretamente (sem empacotar):
 
 ```bash
-dotnet run --project templates/modular-apis/src/Werter.ModularApis.Api --launch-profile http
+dotnet run --project templates/modular-apis/src/Werter.ModularApis --launch-profile http
 ```
 
 Documentação detalhada do projeto gerado: [templates/modular-apis/README.md](templates/modular-apis/README.md).

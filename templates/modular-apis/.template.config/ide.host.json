@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json.schemastore.org/ide-host",
+  "order": 0,
+  "defaultSymbolVisibility": false,
+  "symbolInfo": [
+    {
+      "id": "FeatureName",
+      "name": {
+        "text": "Nome do módulo (plural, PascalCase)"
+      },
+      "description": {
+        "text": "Ex.: Todos, Products, Pedidos — pasta Modules, rota e tags"
+      },
+      "isVisible": true
+    },
+    {
+      "id": "EntityName",
+      "name": {
+        "text": "Nome da entidade (singular, PascalCase)"
+      },
+      "description": {
+        "text": "Ex.: Todo, Product, Pedido — classes, Bruno e arquivos das fatias"
+      },
+      "isVisible": true
+    }
+  ]
+}

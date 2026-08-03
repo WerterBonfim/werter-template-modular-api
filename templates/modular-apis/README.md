@@ -1,20 +1,20 @@
 # Werter.ModularApis
 
-Template de ASP.NET Core **Minimal APIs** (.NET 10) em **monolito modular**: um projeto Api em `src/`, com `Shared/` (cross-cutting) e `Modules/` (vertical slices por ação).
+Template de ASP.NET Core **Minimal APIs** (.NET 10) em **monolito modular** com **vertical slices**: um projeto em `src/`, código compartilhado em `Shared/`, capacidades de negócio em `Modules/` e espaço reservado em `tests/`.
 
 ## Como executar
 
 Na raiz da solution:
 
 ```bash
-dotnet run --project src/Werter.ModularApis.Api --launch-profile http
+dotnet run --project src/Werter.ModularApis --launch-profile http
 ```
 
 A API sobe em **http://localhost:5080**.
 
 ### Nome e descrição da API
 
-Personalize em `src/Werter.ModularApis.Api/appsettings.json` (seção `Api` — **obrigatória**):
+Personalize em `src/Werter.ModularApis/appsettings.json` (seção `Api` — **obrigatória**):
 
 ```json
 "Api": {
@@ -34,6 +34,69 @@ Se a seção `Api` ou `OpenTelemetry` não existir (ou propriedades obrigatória
 | Todos | http://localhost:5080/todos |
 | OpenAPI | http://localhost:5080/openapi/v1.json |
 | Scalar (Development) | http://localhost:5080/scalar/v1 |
+
+## Arquitetura (monolito modular + vertical slice)
+
+O template organiza o código para crescer por **módulo de negócio** e, dentro de cada módulo, por **fatia vertical** (uma ação/caso de uso por pasta). O host (`Program.cs`) só compõe infraestrutura compartilhada e registra os módulos.
+
+```text
+Werter.ModularApis.sln
+bruno/Todo/                         # Collections HTTP versionadas (Bruno)
+tests/                              # Espaço para testes (unit/integration) — vazio de propósito
+src/
+  Werter.ModularApis/
+    Program.cs                      # Host: DI, pipeline e Map dos módulos
+    Shared/                         # Cross-cutting (não é regra de negócio de um módulo)
+      Configuration/                # Options e leitura obrigatória de appsettings
+      Observability/                # OpenTelemetry (traces, metrics, logs)
+      OpenApi/                      # OpenAPI + Scalar
+      Data/                         # Persistência compartilhada (stub; plugar EF/etc.)
+      Exceptions/                   # Tratamento global de erros (ProblemDetails)
+      Extensions/                   # Composição da infra Shared no host
+      ValueObjects/                 # VOs reutilizáveis entre módulos (imutáveis)
+    Modules/
+      Todos/                        # Limite do módulo (bounded context do exemplo)
+        Todo.cs                     # Entidade do módulo
+        TodosModule.cs              # Registro de DI + mapeamento das rotas do módulo
+        Features/                   # Vertical slices (uma pasta = uma ação)
+          ListTodos/                # Endpoint + UseCase + Response
+          GetTodoById/
+          CreateTodo/
+          UpdateTodo/
+          PatchTodo/
+          DeleteTodo/
+```
+
+### O que cada pasta representa
+
+| Pasta | Papel na arquitetura |
+|-------|----------------------|
+| `src/` | Código de produção. Contém o projeto da API. |
+| `tests/` | Reservada para projetos de teste. Adicione aqui unitários, integração, etc., quando precisar. |
+| `bruno/` | Collections REST versionadas no Git para exercitar a API localmente. |
+| `Program.cs` | Ponto de entrada do host: sobe infra compartilhada e mapeia módulos. Sem regra de negócio. |
+| `Shared/` | Aspectos **transversais** usados por vários módulos (config, telemetria, erros, VOs comuns). Evite colocar regra específica de um domínio aqui. |
+| `Shared/Configuration` | Contratos de configuração (`ApiOptions`, `OpenTelemetryOptions`) e helpers de leitura obrigatória. |
+| `Shared/Observability` | Instrumentação OpenTelemetry (OTLP gRPC) pronta para Alloy/Collector. |
+| `Shared/OpenApi` | Documentação OpenAPI e UI Scalar em Development. |
+| `Shared/Data` | Extensão de persistência compartilhada (placeholder). É onde plugar DbContext/EF no futuro. |
+| `Shared/Exceptions` | Handler global de exceções com resposta ProblemDetails. |
+| `Shared/Extensions` | Orquestra `AddSharedInfrastructure` / `UseSharedPipeline` para o host ficar enxuto. |
+| `Shared/ValueObjects` | Value Objects compartilhados (ex.: `Money`, `Email`). Preferir imutáveis (`readonly record struct`). |
+| `Modules/` | Fronteira dos módulos de negócio do monolito. Cada pasta = um módulo. |
+| `Modules/{Modulo}/` | Contém entidade(s) do módulo, `*Module.cs` (DI + endpoints) e `Features/`. |
+| `Modules/{Modulo}/Features/{Acao}/` | **Vertical slice**: tudo daquela ação junto (`Endpoint`, `UseCase`, `Request`/`Response`). Sem MediatR. |
+
+### Fluxo mental
+
+1. Nova capacidade de negócio → novo item em `Modules/` (ou fatia nova em um módulo existente).
+2. Código útil a **mais de um módulo** → `Shared/` (com cuidado para não virar “god folder”).
+3. Conceito de valor reutilizável → `Shared/ValueObjects`.
+4. Testes → projetos em `tests/` referenciando `src/`.
+
+O módulo **Todos** é um exemplo stub (sem persistência) para servir de base ao criar novos módulos/slices.
+
+Ao gerar o projeto, o nome pode ser trocado com `--FeatureName` (plural) e `--EntityName` (singular), por exemplo `--FeatureName Products --EntityName Product`.
 
 ## OpenTelemetry
 
@@ -81,41 +144,9 @@ A collection padrão fica na pasta **`bruno/Todo/`** (OpenCollection YAML, com `
 - `PATCH /todos/{id}`
 - `DELETE /todos/{id}`
 
-## Estrutura do código
-
-```text
-Werter.ModularApis.sln
-bruno/Todo/                         # Collection Bruno (OpenCollection)
-src/
-  Werter.ModularApis.Api/
-    Program.cs                      # Host enxuto
-    Shared/
-      Configuration/                # ApiOptions, OpenTelemetryOptions
-      Observability/                # OpenTelemetry (OTLP gRPC)
-      OpenApi/                      # OpenAPI + Scalar
-      Data/                         # Stub para persistência (sem EF ainda)
-      Exceptions/                   # Handler global ProblemDetails
-      Extensions/                   # AddSharedInfrastructure / UseSharedPipeline
-    Modules/
-      Todos/
-        Todo.cs                     # Entidade do módulo
-        TodosModule.cs              # DI + mapeamento de endpoints
-        Features/
-          ListTodos/                # Endpoint + UseCase + Response
-          GetTodoById/
-          CreateTodo/
-          UpdateTodo/
-          PatchTodo/
-          DeleteTodo/
-```
-
-O módulo **Todos** é um exemplo stub (sem persistência) para servir de base ao criar novos módulos/slices.
-
-Ao gerar o projeto, o nome pode ser trocado com `--FeatureName` (plural) e `--EntityName` (singular), por exemplo `--FeatureName Products --EntityName Product`.
-
 ## Porta HTTP
 
 O perfil `http` usa a porta fixa **5080**, alinhada entre:
 
-- `src/Werter.ModularApis.Api/Properties/launchSettings.json`
+- `src/Werter.ModularApis/Properties/launchSettings.json`
 - `bruno/Todo/environments/local.yml`

@@ -28,8 +28,8 @@
     "FeatureName": {
       "type": "parameter",
       "datatype": "text",
-      "displayName": "Feature name (plural)",
-      "description": "Nome plural da feature de exemplo em PascalCase (pasta, namespace, tags). Ex.: Todos, Products, Pedidos",
+      "displayName": "Nome do módulo (plural)",
+      "description": "Nome plural do módulo de exemplo em PascalCase (pasta, namespace, tags). Ex.: Todos, Products, Pedidos",
       "defaultValue": "Todos",
       "replaces": "Todos",
       "fileRename": "Todos"
@@ -47,7 +47,7 @@
     "EntityName": {
       "type": "parameter",
       "datatype": "text",
-      "displayName": "Entity name (singular)",
+      "displayName": "Nome da entidade (singular)",
       "description": "Nome singular da entidade em PascalCase (classes, Bruno). Ex.: Todo, Product, Pedido",
       "defaultValue": "Todo",
       "replaces": "Todo",
